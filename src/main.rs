@@ -3,8 +3,11 @@ use raylib::prelude::*;
 use raylib::prelude::KeyboardKey::{KEY_RIGHT,KEY_DOWN,KEY_UP,KEY_LEFT};
 
 fn main() {
+    let width = 640;
+    let height = 480;
+
     let (mut rl, thread) = raylib::init()
-        .size(640, 480)
+        .size(width, height)
         .title("Car like kinematics")
         .build();
 
@@ -34,8 +37,8 @@ fn main() {
         vehicle_angle += car_like_velocity / wheel_base * f32::tan(-car_like_angle) * dt;
 
         // Clamp to window nicely
-        vehicle_center.x = f32::rem_euclid(vehicle_center.x, rl.get_screen_width() as f32);
-        vehicle_center.y = f32::rem_euclid(vehicle_center.y, rl.get_screen_height() as f32);
+        vehicle_center.x = f32::rem_euclid(vehicle_center.x, width as f32);
+        vehicle_center.y = f32::rem_euclid(vehicle_center.y, height as f32);
 
         // Input
         if rl.is_key_down(KEY_RIGHT) {
@@ -61,6 +64,7 @@ fn main() {
         d.clear_background(Color::WHITE);
         d.draw_text(format!("Velocity: {}", car_like_velocity).as_str(), 12, 12, 20, Color::BLACK);
         d.draw_text(format!("Angle: {}", car_like_angle).as_str(),12, 32, 20, Color::BLACK);
+        d.draw_text("Move with arrows!".to_string().as_str(), 12, height - 24, 20, Color::GRAY);
 
         unsafe { ffi::rlPushMatrix(); }
             unsafe { ffi::rlTranslatef(vehicle_center.x, vehicle_center.y, 0.0); }

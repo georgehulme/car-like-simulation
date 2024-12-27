@@ -34,7 +34,7 @@ fn main() {
         let dt = rl.get_frame_time();
         vehicle_center.x += car_like_velocity * f32::cos(vehicle_angle) * dt;
         vehicle_center.y += car_like_velocity * f32::sin(vehicle_angle) * dt;
-        vehicle_angle += car_like_velocity / wheel_base * f32::tan(-car_like_angle) * dt;
+        vehicle_angle += car_like_velocity / wheel_base * f32::tan(-1.0 * car_like_angle) * dt; // -1.0 here makes the car rotation follow the right hand rule
 
         // Clamp to window nicely
         vehicle_center.x = f32::rem_euclid(vehicle_center.x, width as f32);
@@ -55,8 +55,8 @@ fn main() {
         }
 
         // Precalculate
-        let left_angle = f32::atan(wheel_base / (wheel_base / f32::tan(-car_like_angle) + wheel_track / 2.0));
-        let right_angle = f32::atan(wheel_base / (wheel_base / f32::tan(-car_like_angle) - wheel_track / 2.0));
+        let left_angle = f32::atan(wheel_base / (wheel_base / f32::tan(-1.0 * car_like_angle) + wheel_track / 2.0)); // -1.0 here makes the car rotation follow the right hand rule
+        let right_angle = f32::atan(wheel_base / (wheel_base / f32::tan(-1.0 * car_like_angle) - wheel_track / 2.0)); // -1.0 here makes the car rotation follow the right hand rule
 
         // Draw
         let mut d = rl.begin_drawing(&thread);

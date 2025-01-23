@@ -1,34 +1,42 @@
-pub(crate) struct Wheel {
+pub struct Wheel3D {
     pub width: f32,
     pub diameter: f32,
-    pub offset: raylib::math::Vector2,
+    pub offset: raylib::math::Vector3,
 }
 
-impl Wheel {
-    pub fn get_lines(
-        &self,
-        wheel_angle: f32,
-    ) -> Vec<(
-        raylib::math::Vector2,
-        raylib::math::Vector2,
-        raylib::color::Color,
-    )> {
-        // Calculate the wheel rectangle
-        let mut rect = [
-            raylib::math::Vector2::new(-self.diameter / 2.0, -self.width / 2.0),
-            raylib::math::Vector2::new(self.diameter / 2.0, -self.width / 2.0),
-            raylib::math::Vector2::new(self.diameter / 2.0, self.width / 2.0),
-            raylib::math::Vector2::new(-self.diameter / 2.0, self.width / 2.0),
-        ];
-        rect.iter_mut()
-            .for_each(|r| *r = r.rotated(wheel_angle) + self.offset);
-
-        // Calculate the lines of the rectangle
-        let mut lines = Vec::new();
-        for i in 0..4 {
-            let j = (i + 1) % 4;
-            lines.push((rect[i], rect[j], raylib::color::Color::BLACK));
+impl Wheel3D {
+    pub fn get_triangle_strip(&self) -> Vec<raylib::math::Vector3> {
+        // Creates a triangle strip of the wheel cylinder centered on the
+        // origin.
+        let mut vertices = Vec::new();
+        let radius = self.diameter / 2.0;
+        let half_width = self.width / 2.0;
+        for i in 0..=20 {
+            let angle = 360.0 / 20.0 * (i as f32 * std::f32::consts::PI / 180.0);
+            vertices.push(raylib::math::Vector3::new(
+                radius * angle.cos(),
+                radius * angle.sin(),
+                half_width,
+            ));
+            vertices.push(raylib::math::Vector3::new(
+                radius * angle.cos(),
+                radius * angle.sin(),
+                -half_width,
+            ));
         }
-        lines
+        for i in 0..=20 {
+            let angle = 360.0 / 20.0 * (i as f32 * std::f32::consts::PI / 180.0);
+            vertices.push(raylib::math::Vector3::new(
+                radius * angle.cos(),
+                radius * angle.sin(),
+                -half_width,
+            ));
+            vertices.push(raylib::math::Vector3::new(
+                radius * angle.cos(),
+                radius * angle.sin(),
+                half_width,
+            ));
+        }
+        vertices
     }
 }

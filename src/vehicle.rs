@@ -1,5 +1,6 @@
 use core::f32;
 use raylib::prelude::{RaylibDraw3D, RaylibMode3DExt};
+use crate::builder::Builder;
 
 const DEBUG: bool = true;
 
@@ -19,6 +20,65 @@ pub(crate) struct Vehicle3D {
     pub pivot_offset: raylib::math::Vector3,
     // Diameter of the wheels
     pub wheels: Vec<crate::wheel::Wheel3D>,
+}
+
+pub struct Vehicle3DBuilder {
+    position: Option<raylib::math::Vector3>,
+    speed: f32,
+    direction: Option<raylib::math::Vector3>,
+    pivot_offset: Option<raylib::math::Vector3>,
+    wheels: Vec<crate::wheel::Wheel3D>,
+}
+
+impl Vehicle3DBuilder {
+    pub fn new() -> Self {
+        Self {
+            position: None,
+            speed: 0.0,
+            direction: None,
+            pivot_offset: None,
+            wheels: Vec::new(),
+        }
+    }
+
+    pub fn set_position(mut self, pos: raylib::math::Vector3) -> Self {
+        self.position = Some(pos);
+        self
+    }
+
+    pub fn set_speed(mut self, speed: f32) -> Self {
+        self.speed = speed;
+        self
+    }
+
+    pub fn set_direction(mut self, dir: raylib::math::Vector3) -> Self {
+        self.direction = Some(dir.normalized());
+        self
+    }
+
+    pub fn set_pivot_offset(mut self, offset: raylib::math::Vector3) -> Self {
+        self.pivot_offset = Some(offset);
+        self
+    }
+
+    pub fn add_wheel(mut self, wheel: crate::wheel::Wheel3D) -> Self {
+        self.wheels.push(wheel);
+        self
+    }
+}
+
+impl Builder<Vehicle3D> for Vehicle3DBuilder {
+    fn create(self) -> Vehicle3D {
+        Vehicle3D {
+            position: self.position.unwrap_or(raylib::math::Vector3::zero()),
+            speed: self.speed,
+            direction: self.direction.unwrap_or(raylib::math::Vector3::new(1.0, 0.0, 0.0)),
+            curvature: 0.0,
+            vehicle_angle: 0.0,
+            pivot_offset: self.pivot_offset.unwrap_or(raylib::math::Vector3::zero()),
+            wheels: self.wheels,
+        }
+    }
 }
 
 impl Vehicle3D {

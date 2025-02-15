@@ -1,8 +1,8 @@
 use raylib::prelude::KeyboardKey::{KEY_DOWN, KEY_LEFT, KEY_RIGHT, KEY_UP};
 use raylib::prelude::*;
-use vehicle::Vehicle3D;
-use wheel::Wheel3D;
+use builder::Builder;
 
+mod builder;
 mod vehicle;
 mod wheel;
 
@@ -47,68 +47,75 @@ fn main() {
 
     let mut steering_angle = 0.0;
 
-    let mut vehicle = Vehicle3D {
-        position: Vector3 {
-            x: 0.0,
-            y: wheel_diameter / 2.0,
-            z: 0.0,
-        },
-        speed: 0.0,
-        direction: Vector3::new(1.0, 0.0, 0.0),
-        curvature: get_turn_curvature(steering_angle, effective_wheel_base),
-        vehicle_angle: 0.0,
-        pivot_offset: raylib::math::Vector3::new(-effective_wheel_base / 2.0, 0.0, 0.0),
-        wheels: vec![
-            // Back left
-            Wheel3D {
-                offset: Vector3::new(
-                    -effective_wheel_base / 2.0,
-                    0.0,
-                    -effective_wheel_track / 2.0,
-                ),
-                diameter: wheel_diameter,
-                width: wheel_width,
-            },
-            // Back right
-            Wheel3D {
-                offset: Vector3::new(
-                    -effective_wheel_base / 2.0,
-                    0.0,
-                    effective_wheel_track / 2.0,
-                ),
-                diameter: wheel_diameter,
-                width: wheel_width,
-            },
-            // Mid left
-            Wheel3D {
-                offset: Vector3::new(0.0, 0.0, -(effective_wheel_track / 2.0 + wheel_width / 2.0)),
-                diameter: wheel_diameter,
-                width: wheel_width,
-            },
-            // Mid right
-            Wheel3D {
-                offset: Vector3::new(0.0, 0.0, effective_wheel_track / 2.0 + wheel_width / 2.0),
-                diameter: wheel_diameter,
-                width: wheel_width,
-            },
-            // Front left
-            Wheel3D {
-                offset: Vector3::new(
-                    effective_wheel_base / 2.0,
-                    0.0,
-                    -effective_wheel_track / 2.0,
-                ),
-                diameter: wheel_diameter,
-                width: wheel_width,
-            },
-            // Front right
-            Wheel3D {
-                offset: Vector3::new(effective_wheel_base / 2.0, 0.0, effective_wheel_track / 2.0),
-                diameter: wheel_diameter,
-                width: wheel_width,
-            },
-        ],
-    };
+    // Create wheels using the builder pattern.
+    let wheel_bl = wheel::Wheel3DBuilder::new()
+        .set_offset(Vector3::new(
+            -effective_wheel_base / 2.0,
+            0.0,
+            -effective_wheel_track / 2.0,
+        ))
+        .set_diameter(wheel_diameter)
+        .set_width(wheel_width)
+        .create();
+    let wheel_br = wheel::Wheel3DBuilder::new()
+        .set_offset(Vector3::new(
+            -effective_wheel_base / 2.0,
+            0.0,
+            effective_wheel_track / 2.0,
+        ))
+        .set_diameter(wheel_diameter)
+        .set_width(wheel_width)
+        .create();
+    let wheel_ml = wheel::Wheel3DBuilder::new()
+        .set_offset(Vector3::new(
+            0.0,
+            0.0,
+            -(effective_wheel_track / 2.0 + wheel_width / 2.0),
+        ))
+        .set_diameter(wheel_diameter)
+        .set_width(wheel_width)
+        .create();
+    let wheel_mr = wheel::Wheel3DBuilder::new()
+        .set_offset(Vector3::new(
+            0.0,
+            0.0,
+            effective_wheel_track / 2.0 + wheel_width / 2.0,
+        ))
+        .set_diameter(wheel_diameter)
+        .set_width(wheel_width)
+        .create();
+    let wheel_fl = wheel::Wheel3DBuilder::new()
+        .set_offset(Vector3::new(
+            effective_wheel_base / 2.0,
+            0.0,
+            -effective_wheel_track / 2.0,
+        ))
+        .set_diameter(wheel_diameter)
+        .set_width(wheel_width)
+        .create();
+    let wheel_fr = wheel::Wheel3DBuilder::new()
+        .set_offset(Vector3::new(
+            effective_wheel_base / 2.0,
+            0.0,
+            effective_wheel_track / 2.0,
+        ))
+        .set_diameter(wheel_diameter)
+        .set_width(wheel_width)
+        .create();
+
+    // Create the vehicle using the builder pattern.
+    let mut vehicle = vehicle::Vehicle3DBuilder::new()
+        .set_position(Vector3::new(0.0, wheel_diameter / 2.0, 0.0))
+        .set_speed(0.0)
+        .set_direction(Vector3::new(1.0, 0.0, 0.0))
+        .set_pivot_offset(Vector3::new(-effective_wheel_base / 2.0, 0.0, 0.0))
+        .add_wheel(wheel_bl)
+        .add_wheel(wheel_br)
+        .add_wheel(wheel_ml)
+        .add_wheel(wheel_mr)
+        .add_wheel(wheel_fl)
+        .add_wheel(wheel_fr)
+        .create();
 
     let mut camera = raylib::camera::Camera3D::perspective(
         vehicle.position + camera_offset,
